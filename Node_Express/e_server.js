@@ -24,6 +24,40 @@ app.set("view engine", "ejs")
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+//API to the Esp 32 , to fetch database, status value for turning on and Off
+app.get('/Hardware',(req,res) => {
+
+         con.connect(function(err) {
+  if (err) throw err;
+  con.query("SELECT Blub_On FROM bulbstatus", function (err, result, fields) {
+    if (err) throw err;
+   
+res.send(result)
+  });
+});
+
+})
+
+
+
+
+
+
+
+
+
+
 ////Middle ware
 const CheckLogin = (req,res,next) => {
 
@@ -68,6 +102,22 @@ res.render("SignUp")
 })
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Direct to Index.ejs main page
+
 app.get("/index",CheckLogin,(req, res) => {
 
     const house = req.session.user.homeName
@@ -87,10 +137,6 @@ app.get("/index",CheckLogin,(req, res) => {
     
    }
 
-  
-
-
-    
  
 )
 
@@ -117,18 +163,7 @@ app.get('/switch',(req,res) => {
 })
 
 
-app.get('/Hardware',(req,res) => {
-
-         con.connect(function(err) {
-  if (err) throw err;
-  con.query("SELECT Blub_On FROM bulbstatus", function (err, result, fields) {
-    if (err) throw err;
-   
-res.send(result)
-  });
-});
-
-})
+ 
 
 
 app.get('/display',(req,res) => {
