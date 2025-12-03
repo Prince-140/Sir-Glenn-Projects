@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Smart Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .signup-container {
+            width: 100%;
+            max-width: 500px;
+            z-index: 1;
+        }
+        
+        .signup-panel {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(31, 38, 135, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .form-group i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.15);
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            z-index: 2;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 14px 14px 65px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .error-message {
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.4);
+            color: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: block;
+        }
+        
+        .error-message h3 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .signup-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .signup-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #5a6fd8, #6a4190);
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        
+        .login-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 2;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .password-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 550px) {
+            .signup-panel {
+                padding: 30px 25px;
+            }
+            
+            .logo h1 {
+                font-size: 2.2rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .form-group input {
+                padding: 12px 12px 12px 55px;
+                font-size: 0.95rem;
+            }
+            
+            .form-group i {
+                width: 35px;
+                height: 35px;
+                font-size: 1.1rem;
+            }
+            
+            .signup-button, .login-button {
+                padding: 12px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .signup-panel {
+                padding: 25px 20px;
+            }
+            
+            .logo h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="signup-container">
+        <div class="signup-panel">
+            <div class="logo">
+                <h1>CREATE ACCOUNT</h1>
+            </div>
+            
+       
+            <form action="/Validation/Create" method="POST" id="signupForm">
+                <div class="form-group">
+                    <i class="fas fa-home"></i>
+                    <input type="text" name="housename" placeholder="Household name" required autocomplete="organization">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="firstname" placeholder="First name" required autocomplete="given-name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="lastname" placeholder="Last name" required autocomplete="family-name">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-user-circle"></i>
+                    <input type="text" name="username" placeholder="Username" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" id="password" placeholder="Password" required autocomplete="new-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i id="toggleIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+                
+                <button type="submit" class="signup-button">Create Account</button>
+            </form>
+            
+            <a href="/Login" class="login-button">Already have an account? Login</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const input = document.getElementById("password");
+            const icon = document.getElementById("toggleIcon");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+        
+        // Form validation
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            const housename = this.querySelector('input[name="housename"]').value.trim();
+            const firstname = this.querySelector('input[name="firstname"]').value.trim();
+            const lastname = this.querySelector('input[name="lastname"]').value.trim();
+            const username = this.querySelector('input[name="username"]').value.trim();
+            const password = this.querySelector('input[name="password"]').value.trim();
+            
+            // Clear previous alerts
+            const existingAlerts = document.querySelectorAll('.alert-message');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Validation checks
+            let isValid = true;
+            let errorMessage = '';
+            
+            if (!housename) {
+                errorMessage = 'Please enter a household name';
+                isValid = false;
+            } else if (!firstname) {
+                errorMessage = 'Please enter your first name';
+                isValid = false;
+            } else if (!lastname) {
+                errorMessage = 'Please enter your last name';
+                isValid = false;
+            } else if (!username) {
+                errorMessage = 'Please enter a username';
+                isValid = false;
+            } else if (!password) {
+                errorMessage = 'Please enter a password';
+                isValid = false;
+            } else if (password.length < 6) {
+                errorMessage = 'Password must be at least 6 characters long';
+                isValid = false;
+            } else if (username.length < 3) {
+                errorMessage = 'Username must be at least 3 characters long';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                
+                // Create error message display
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `<h3>${errorMessage}</h3>`;
+                
+                // Insert after logo
+                const logo = document.querySelector('.logo');
+                logo.parentNode.insertBefore(errorDiv, logo.nextSibling);
+                
+                return false;
+            }
+            
+            return true;
+        });
+        
+        // Pre-fill fields if there was an error (for better UX)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's a URL parameter for pre-filled data
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            const fields = ['housename', 'firstname', 'lastname', 'username'];
+            fields.forEach(field => {
+                const value = urlParams.get(field);
+                if (value) {
+                    const input = document.querySelector(`input[name="${field}"]`);
+                    if (input) {
+                        input.value = decodeURIComponent(value);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

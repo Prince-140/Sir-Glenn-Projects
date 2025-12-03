@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Add Appliance Form Styles */
+        .add-appliance-form-container {
+            margin-bottom: 30px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            border: 2px solid #52acbc;
+            box-shadow: 0 4px 20px rgba(82, 172, 188, 0.15);
+            position: relative;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #52acbc, #4CAF50);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .form-actions .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Dashboard Animation Styles */
+        .animate-item {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1);
+        }
+        .animate-item.show {
+            opacity: 1;
+            transform: none;
+        }
+        /* Subtle hover for cards and containers */
+        .card, .appliance-card, .chart-container, .table-container {
+            transition: box-shadow 0.3s, transform 0.3s;
+        }
+        .card:hover, .appliance-card:hover, .chart-container:hover, .table-container:hover {
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18);
+            transform: translateY(-4px) scale(1.02);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Color variables for palette improvements */
+        :root{
+            --bg: #F5F5F5;
+            --surface: #ffffff;
+            --muted: #666666;
+            --muted-2: #e0e0e0;
+            --accent: #52acbc;
+            --accent-2: #4CAF50;
+            --danger: #FF5722;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: #333333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 30px 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #cccccc;
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: #999999;
+        }
+
+        .logo-section {
+            margin-bottom: 40px;
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #52acbc;
+        }
+
+        .logo-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #52acbc, #4CAF50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-section p {
+            font-size: 0.85rem;
+            color: #666666;
+            font-weight: 400;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 8px;
+        }
+
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #666666;
+            padding: 14px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .nav-menu a i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-menu a:hover {
+            background: #f0f9ff;
+            color: #52acbc;
+            transform: translateX(5px);
+        }
+
+        .nav-menu a.active {
+            background: linear-gradient(135deg, #52acbc, #4CAF50);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(82, 172, 188, 0.3);
+            border-left: 4px solid #4CAF50;
+        }
+
+        .logout-btn {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .logout-btn a {
+            background: #fff5f5;
+            border: 1px solid #ffebee;
+            color: #f44336;
+        }
+
+        .logout-btn a:hover {
+            background: #ffebee;
+            border-color: #f44336;
+            transform: translateX(5px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        /* Top Bar */
+        .topbar {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
+        }
+
+        .topbar-left h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333333;
+        }
+
+        .topbar-left p {
+            font-size: 0.9rem;
+            color: #666666;
+            font-weight: 400;
+        }
+
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f0f9ff;
+            padding: 10px 20px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            border: 1px solid #e3f2fd;
+        }
+
+        /* Avatar base styles */
+        .profile-avatar{
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            width:45px;
+            height:45px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:1.2rem;
+            font-weight:700;
+            color:#ffffff;
+            cursor:pointer;
+            transition: transform .35s ease, box-shadow .35s ease, background-image .35s ease;
+            box-shadow: 0 3px 10px rgba(82,172,188,0.25);
+        }
+
+        .profile-avatar .avatar-initial{ display:block; }
+        .profile-avatar.has-photo .avatar-initial{ display:none; }
+
+        /* Only use gradient when there is no photo */
+        .profile-avatar:not(.has-photo){
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        }
+
+        .profile-avatar.has-photo{ box-shadow: 0 6px 20px rgba(0,0,0,0.35); border: 2px solid rgba(255,255,255,0.06); }
+
+        #remove-photo-btn {
+            background: transparent;
+            border: 1px solid rgba(0,0,0,0.08);
+            color: var(--muted);
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .profile-box:hover {
+            background: #e1f5fe;
+            border-color: #52acbc;
+        }
+
+        .profile-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #52acbc 0%, #4CAF50 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            box-shadow: 0 3px 10px rgba(82, 172, 188, 0.3);
+        }
+
+        .profile-info strong {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 3px;
+            color: #333333;
+        }
+
+        .profile-info small {
+            font-size: 0.85rem;
+            color: #666666;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #52acbc, #4CAF50);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(82, 172, 188, 0.2);
+            border-color: #52acbc;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #e3f2fd, #e8f5e9);
+            color: #52acbc;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            color: #666666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #52acbc, #4CAF50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-footer {
+            font-size: 0.85rem;
+            color: #666666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Appliances Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .add-appliance-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #52acbc 0%, #4CAF50 100%);
+            border: none;
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(82, 172, 188, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-appliance-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(82, 172, 188, 0.4);
+            background: linear-gradient(135deg, #4a9aa9, #45a049);
+        }
+
+        /* Appliance Grid */
+        .appliance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .appliance-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .appliance-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(82, 172, 188, 0.2);
+            border-color: #52acbc;
+        }
+
+        .appliance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .appliance-icon {
+            font-size: 2.5rem;
+            color: #52acbc;
+        }
+
+        .delete-appliance-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .appliance-card:hover .delete-appliance-btn {
+            opacity: 1;
+        }
+
+        .delete-appliance-btn:hover {
+            color: #ff4757;
+            transform: scale(1.1);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-switch input:disabled + .toggle-slider {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cccccc;
+            transition: 0.3s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #52acbc, #4CAF50);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .appliance-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333333;
+        }
+
+        .appliance-status {
+            font-size: 0.85rem;
+            color: #666666;
+        }
+
+        .appliance-power {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.9rem;
+            color: #666666;
+        }
+
+        .power-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 5px;
+            color: #52acbc;
+        }
+
+        .auto-mode-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auto-mode-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666666;
+        }
+
+        .auto-mode-toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+
+        .auto-mode-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .auto-mode-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cccccc;
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .auto-mode-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .auto-mode-toggle input:checked + .auto-mode-slider {
+            background: linear-gradient(135deg, #52acbc, #4CAF50);
+        }
+
+        .auto-mode-toggle input:checked + .auto-mode-slider:before {
+            transform: translateX(24px);
+        }
+
+        .auto-mode-active {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid #e0e0e0;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #52acbc;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666666;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #ff6b6b;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            overflow-x: auto;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-container h3 {
+            color: #333333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            border-bottom: 2px solid #52acbc;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            color: #333333;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: #f0f9ff;
+        }
+
+        td {
+            color: #666666;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-on {
+            background: #e8f5e9;
+            color: #4CAF50;
+            border: 1px solid #c8e6c9;
+        }
+
+        .status-off {
+            background: #f5f5f5;
+            color: #9e9e9e;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 25px;
+            min-height: 400px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #333333;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--muted-2);
+        }
+
+        /* Entrance animations (clean, professional) */
+        .animate-item{ opacity:0; transform: translateY(12px); transition: opacity .48s cubic-bezier(.2,.8,.2,1), transform .48s cubic-bezier(.2,.8,.2,1); }
+        .animate-item.show{ opacity:1; transform: translateY(0); }
+
+        /* Chart subtle pop */
+        .chart-svg{ transform-origin: center; opacity:0; transform: scale(.96); transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .45s ease; }
+        .chart-svg.show{ opacity:1; transform: scale(1); }
+
+        /* Slight hover lift for interactive polish */
+        .card:hover, .appliance-card:hover { transform: translateY(-6px); box-shadow: 0 14px 40px rgba(34,49,63,0.08); }
+
+        .chart-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #666666;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Settings Form */
+        .settings-section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .settings-section h3 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333333;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #333333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: #fafafa;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            color: #333333;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            background: #ffffff;
+            border-color: #52acbc;
+            box-shadow: 0 0 0 3px rgba(82, 172, 188, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #999999;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #52acbc 0%, #4CAF50 100%);
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(82, 172, 188, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(82, 172, 188, 0.4);
+            background: linear-gradient(135deg, #4a9aa9, #45a049);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #666666 0%, #888888 100%);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #555555, #777777);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .add-appliance-btn {
+                align-self: stretch;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo-section">
+                <h1><i class="fas fa-home"></i> SMART HOME</h1>
+                <p>Control Center</p>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="#" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a></li>
+                <li><a href="#" class="nav-link" data-section="appliances">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Appliances</span>
+                </a></li>
+                <li><a href="#" class="nav-link" data-section="energy">
+                    <i class="fas fa-bolt"></i>
+                    <span>Energy Monitor</span>
+                </a></li>
+                <li><a href="#" class="nav-link" data-section="summary">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Summary</span>
+                </a></li>
+                <li><a href="#" class="nav-link" data-section="logs">
+                    <i class="fas fa-history"></i>
+                    <span>Activity Logs</span>
+                </a></li>
+                <li><a href="#" class="nav-link" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a></li>
+                <li class="logout-btn"><a href="/Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="topbar">
+                <div class="topbar-left">
+                    <h2 id="page-title">Dashboard Overview</h2>
+                    <p>Welcome back, User!</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <input type="file" id="profile-photo-input" accept="image/*" style="display:none">
+                   
+                    <div class="profile-box">
+                        <div class="profile-avatar" id="profile-avatar" style="width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;" tabindex="0" title="Change profile photo">
+                            <span class="avatar-initial">U</span>
+                        </div>
+                        <div class="profile-info">
+                            <% if (message){ %>
+                                <strong><%= message %></strong>
+                            <% } %>
+                        </div>
+                        <button id="remove-photo-btn" style="display:none;margin-left:8px;">Remove</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div class="content-section active" id="dashboard">
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-user-circle"></i></div>
+                            <div class="card-title">Live PIR</div>
+                        </div>
+                        <div class="card-value" id="pir-value">245</div>
+                        <div class="card-footer">
+                            <i class="fas fa-arrow-up"></i> Motion detected
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-sun"></i></div>
+                            <div class="card-title">LDR Value</div>
+                        </div>
+                        <div class="card-value" id="ldr-value">780</div>
+                        <div class="card-footer">
+                            <i class="fas fa-info-circle"></i> Lux level
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="card-title">Current</div>
+                        </div>
+                        <div class="card-value" id="current-value">12.5 A</div>
+                        <div class="card-footer">
+                            <i class="fas fa-chart-line"></i> Real-time
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <div class="card-title">Wattage</div>
+                        </div>
+                        <div class="card-value" id="watt-value">2.75 kW</div>
+                        <div class="card-footer">
+                            <i class="fas fa-plug"></i> Total power
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div class="card-title">Daily Cost</div>
+                        </div>
+                        <div class="card-value" id="cost-day">$8.45</div>
+                        <div class="card-footer">
+                            <i class="fas fa-calendar-day"></i> Today's usage
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-chart-bar"></i></div>
+                            <div class="card-title">Monthly Estimate</div>
+                        </div>
+                        <div class="card-value" id="cost-month">$253</div>
+                        <div class="card-footer">
+                            <i class="fas fa-calendar-alt"></i> Projected cost
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <!-- Appliances Section -->
+            <div class="content-section" id="appliances">
+                <div class="section-header">
+                    <h2><i class="fas fa-lightbulb"></i> Appliances Control</h2>
+                    <button class="add-appliance-btn" id="add-appliance-btn">
+                        <i class="fas fa-plus"></i> Add Appliance
+                    </button>
+                </div>
+
+
+
+ <!-- Add Appliance Modal -->
+    <div class="modal-overlay" id="add-appliance-modal">
+        <div class="modal-content">
+
+            <form id="appliance-form"  action="/Update/create" method="POST">  
+                <div class="form-group">
+                    <label for="appliance-names">Appliance Name *</label>
+                    <input type="text" id="appliance-names" name="App_name" placeholder="e.g., Living Room Light" required>
+                </div>
+                <div class="form-group">
+                    <label for="appliance-type">Type of Appliance</label>
+                    <select id="appliance-type" name="App_type">
+                        <option value="Light">Light</option>
+                        <option value="Fan">Fan</option>
+                        <option value="Charger">Charger</option>
+                        <option value="Tv">TV</option>
+                        <option value="AC">Air Conditioner</option>
+                        <option value="Heater">Heater</option>
+                        <option value="Computer">Computer</option>
+                        <option value="Fefrigerator">Refrigerator</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appliance-power">Power Consumption (Watts)</label>
+                    <input type="number" id="appliance-power" name="App_power" placeholder="e.g., 150" min="0" step="1" value="100">
+                </div>
+                <div class="form-group" style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn" style="flex: 1;">
+                        Create
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancel-modal" style="flex: 1;">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+      <table>
+    <tr>
+        <th>Name</th> 
+        <th>Type</th>
+        <th>Consumption</th>
+        <th>Time Use</th>
+        <th>Usage</th>
+        <th>Status</th>
+      
+        <th>Actions</th>
+    </tr>
+    
+    <% if(App_List && App_List.length > 0) { %>
+        <% App_List.forEach(function(result){ 
+            const id = result.Id;
+            const isChecked = result.Status === "ON";
+        %>
+            <tr>
+                <td><%= result.Name %></td> 
+                <td><%= result.Type %></td>
+                <td><%= result.WattUsage %>kWH</td>
+                <td>50h</td>
+                <td>200kWH</td>
+                <td><%= result.Status %></td>
+                 
+                <td>
+                    <!-- Remove button -->
+                    <form action="/Update/remove" method="POST" style="display:inline;">
+                        <input type="hidden" name="remove" value="<%= id %>">
+                        <button type="submit" class="add-appliance-btn" 
+                                style="background:#ff6b6b; padding:8px 16px;">
+                            Remove
+                        </button>
+                    </form>
+                    
+                    <!-- Hidden forms for toggle actions -->
+                    <form action="/Update/turnOn" method="POST" 
+                          class="turn-on-form" data-id="<%= id %>" style="display:none;">
+                        <input type="hidden" name="turnOn" value="1">
+                        <input type="hidden" name="Id" value="<%= id %>">
+                    </form>
+                    
+                    <form action="/Update/turnOff" method="POST" 
+                          class="turn-off-form" data-id="<%= id %>" style="display:none;">
+                        <input type="hidden" name="turnOff" value="0">
+                        <input type="hidden" name="Id" value="<%= id %>">
+                    </form>
+                </td>
+            </tr>
+        <% }); %>
+    <% } else { %>
+        <tr>
+            <td colspan="8">No data Found</td>
+        </tr>
+    <% } %>
+</table>
+
+<script>
+    // Handle all toggle switches
+    document.addEventListener('change', function(event) {
+        if (event.target.classList.contains('appliance-switch')) {
+            const id = event.target.getAttribute('data-id');
+            if (event.target.checked) {
+                // Submit turn ON form
+                document.querySelector(`.turn-on-form[data-id="${id}"]`).submit();
+            } else {
+                // Submit turn OFF form
+                document.querySelector(`.turn-off-form[data-id="${id}"]`).submit();
+            }
+        }
+    });
+</script>
+
+
+
+     
+        
+     
+
+
+            </div>
+
+
+
+
+
+
+            <!-- Energy Monitor Section -->
+            <div class="content-section" id="energy">
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="card-title">Current Usage</div>
+                        </div>
+                        <div class="card-value">2.75 kW</div>
+                        <div class="card-footer">
+                            <i class="fas fa-clock"></i> Real-time monitoring
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="card-title">Peak Today</div>
+                        </div>
+                        <div class="card-value">3.2 kW</div>
+                        <div class="card-footer">
+                            <i class="fas fa-arrow-up"></i> At 2:30 PM
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div class="card-title">Today's Cost</div>
+                        </div>
+                        <div class="card-value">$8.45</div>
+                        <div class="card-footer">
+                            <i class="fas fa-calendar-day"></i> Daily total
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title"><i class="fas fa-chart-area"></i> Energy Usage Chart (24 Hours)</h3>
+                    <div class="chart-wrapper">
+                        <svg class="chart-svg" viewBox="0 0 900 320" id="energy-chart">
+                            <!-- SVG chart content (unchanged) -->
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Usage by Appliance</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="appliance-donut-canvas" width="500" height="320" style="max-width:100%;"></canvas>
+                    </div>
+                    <div class="chart-legend" id="appliance-legend"></div>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="content-section" id="summary">
+                <div class="cards-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-calendar-day"></i></div>
+                            <div class="card-title">Today</div>
+                        </div>
+                        <div class="card-value">8.45 kWh</div>
+                        <div class="card-footer">
+                            <i class="fas fa-dollar-sign"></i> Cost: $8.45
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-calendar-week"></i></div>
+                            <div class="card-title">This Week</div>
+                        </div>
+                        <div class="card-value">59.2 kWh</div>
+                        <div class="card-footer">
+                            <i class="fas fa-dollar-sign"></i> Cost: $59.20
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="card-title">This Month</div>
+                        </div>
+                        <div class="card-value">253 kWh</div>
+                        <div class="card-footer">
+                            <i class="fas fa-dollar-sign"></i> Cost: $253.00
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h3 style="margin-bottom: 20px; font-size: 1.3rem; font-weight: 600;">Weekly Summary</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Usage (kWh)</th>
+                                <th>Cost ($)</th>
+                                <th>Peak Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Monday</td>
+                                <td>8.5</td>
+                                <td>$8.50</td>
+                                <td>2:30 PM</td>
+                            </tr>
+                            <tr>
+                                <td>Tuesday</td>
+                                <td>8.2</td>
+                                <td>$8.20</td>
+                                <td>3:15 PM</td>
+                            </tr>
+                            <tr>
+                                <td>Wednesday</td>
+                                <td>9.1</td>
+                                <td>$9.10</td>
+                                <td>2:00 PM</td>
+                            </tr>
+                            <tr>
+                                <td>Thursday</td>
+                                <td>8.8</td>
+                                <td>$8.80</td>
+                                <td>2:45 PM</td>
+                            </tr>
+                            <tr>
+                                <td>Friday</td>
+                                <td>9.3</td>
+                                <td>$9.30</td>
+                                <td>1:30 PM</td>
+                            </tr>
+                            <tr>
+                                <td>Saturday</td>
+                                <td>7.9</td>
+                                <td>$7.90</td>
+                                <td>11:00 AM</td>
+                            </tr>
+                            <tr>
+                                <td>Sunday</td>
+                                <td>7.4</td>
+                                <td>$7.40</td>
+                                <td>10:30 AM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Activity Logs Section -->
+            <div class="content-section" id="logs">
+                <div class="table-container">
+                    <h3 style="margin-bottom: 20px; font-size: 1.3rem; font-weight: 600;">Recent Activity</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Action</th>
+                                <th>Appliance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>10:45 AM</td>
+                                <td>Turned ON</td>
+                                <td>Living Room Light</td>
+                                <td><span class="status-badge status-on">ACTIVE</span></td>
+                            </tr>
+                            <tr>
+                                <td>10:30 AM</td>
+                                <td>Turned OFF</td>
+                                <td>Ceiling Fan</td>
+                                <td><span class="status-badge status-off">INACTIVE</span></td>
+                            </tr>
+                            <tr>
+                                <td>09:15 AM</td>
+                                <td>Turned ON</td>
+                                <td>Air Conditioner</td>
+                                <td><span class="status-badge status-on">ACTIVE</span></td>
+                            </tr>
+                            <tr>
+                                <td>08:00 AM</td>
+                                <td>Turned ON</td>
+                                <td>Smart TV</td>
+                                <td><span class="status-badge status-on">ACTIVE</span></td>
+                            </tr>
+                            <tr>
+                                <td>07:30 AM</td>
+                                <td>Turned ON</td>
+                                <td>Computer</td>
+                                <td><span class="status-badge status-on">ACTIVE</span></td>
+                            </tr>
+                            <tr>
+                                <td>11:30 PM</td>
+                                <td>Turned OFF</td>
+                                <td>Water Heater</td>
+                                <td><span class="status-badge status-off">INACTIVE</span></td>
+                            </tr>
+                            <tr>
+                                <td>10:00 PM</td>
+                                <td>Turned OFF</td>
+                                <td>Living Room Light</td>
+                                <td><span class="status-badge status-off">INACTIVE</span></td>
+                            </tr>
+                            <tr>
+                                <td>09:45 PM</td>
+                                <td>Auto Mode Enabled</td>
+                                <td>System</td>
+                                <td><span class="status-badge status-on">ACTIVE</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="content-section" id="settings">
+                <div class="settings-section">
+                    <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" value="User" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="user@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Change Password</label>
+                        <input type="password" placeholder="Enter new password">
+                    </div>
+                    <button class="btn">Save Changes</button>
+                </div>
+
+                
+                <div class="settings-section">
+                    <h3><i class="fas fa-bell"></i> Notifications</h3>
+                    <div class="form-group">
+                        <label>Email Notifications</label>
+                        <select>
+                            <option>Enabled</option>
+                            <option>Disabled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>High Usage Alert Threshold (kW)</label>
+                        <input type="number" value="3.0" step="0.1" placeholder="3.0">
+                    </div>
+                    <div class="form-group">
+                        <label>Daily Report</label>
+                        <select>
+                            <option>Enabled</option>
+                            <option>Disabled</option>
+                        </select>
+                    </div>
+                    <button class="btn">Save Notifications</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <script>
+        // Navigation functionality
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Hide all content sections
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show the selected section
+                const sectionId = this.getAttribute('data-section');
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Update page title
+                const titles = {
+                    'dashboard': 'Dashboard Overview',
+                    'appliances': 'Appliances Control',
+                    'energy': 'Energy Monitor',
+                    'summary': 'Usage Summary',
+                    'logs': 'Activity Logs',
+                    'settings': 'System Settings'
+                };
+                document.getElementById('page-title').textContent = titles[sectionId] || 'Dashboard';
+                
+                // Re-run animations for the new section
+                setTimeout(animateDashboard, 100);
+            });
+        });
+
+        // Dynamic Appliance Management
+        class ApplianceManager {
+            constructor() {
+                this.applianceCounter = 0;
+                this.applianceGrid = document.getElementById('appliance-grid');
+                this.addButton = document.getElementById('add-appliance-btn');
+                this.modal = document.getElementById('add-appliance-modal');
+                this.form = document.getElementById('appliance-form');
+                this.template = document.getElementById('appliance-template');
+                
+                this.initEventListeners();
+                this.loadAppliancesFromStorage();
+            }
+            
+            initEventListeners() {
+                // Add button click
+                this.addButton.addEventListener('click', () => this.showModal());
+                
+                // Modal close buttons
+                document.getElementById('close-modal').addEventListener('click', () => this.hideModal());
+                document.getElementById('cancel-modal').addEventListener('click', () => this.hideModal());
+                
+                // Modal overlay click
+                this.modal.addEventListener('click', (e) => {
+                    if (e.target === this.modal) {
+                        this.hideModal();
+                    }
+                });
+                
+                // Form submission
+                this.form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createAppliance();
+                });
+                
+                // Appliance grid delegated events
+                this.applianceGrid.addEventListener('click', (e) => {
+                    // Delete button
+                    if (e.target.closest('.delete-appliance-btn')) {
+                        const card = e.target.closest('.appliance-card');
+                        if (card && confirm('Are you sure you want to delete this appliance?')) {
+                            this.deleteAppliance(card);
+                        }
+                    }
+                    
+                    // Toggle switch
+                    if (e.target.type === 'checkbox') {
+                        this.handleToggleSwitch(e.target);
+                    }
+                });
+            }
+            
+            showModal() {
+                this.modal.classList.add('active');
+                document.getElementById('appliance-name').focus();
+            }
+            
+            hideModal() {
+                this.modal.classList.remove('active');
+                this.form.reset();
+            }
+            
+            createAppliance() {
+                const name = document.getElementById('appliance-name').value.trim();
+                const type = document.getElementById('appliance-type').value;
+                const power = parseInt(document.getElementById('appliance-power').value) || 100;
+                
+                // Map type to icon
+                const iconMap = {
+                    'light': 'fa-lightbulb',
+                    'fan': 'fa-fan',
+                    'Charger': 'fa-plug',
+                    'tv': 'fa-tv',
+                    'ac': 'fa-snowflake',
+                    'heater': 'fa-fire',
+                    'computer': 'fa-laptop',
+                    'refrigerator': 'fa-blender',
+                    'other': 'fa-plug'
+                };
+                
+                const icon = iconMap[type] || 'fa-plug';
+                
+                if (!name) {
+                    alert('Please enter an appliance name');
+                    return;
+                }
+                
+                // Create new appliance card
+                const card = this.createApplianceCard(name, icon, power);
+                this.applianceGrid.appendChild(card);
+                
+                // Hide modal and reset form
+                this.hideModal();
+                
+                // Animate new card
+                card.classList.add('animate-item');
+                setTimeout(() => {
+                    card.classList.add('show');
+                }, 50);
+                
+                // Update donut chart
+                renderApplianceDonut();
+                
+                // Add to activity logs
+                this.addToActivityLog(name, 'added');
+                
+                // Save to localStorage
+                this.saveAppliancesToStorage();
+            }
+            
+            createApplianceCard(name, icon, power, isOn = false) {
+                const template = this.template.content.cloneNode(true);
+                const card = template.querySelector('.appliance-card');
+                const cardId = `appliance-${Date.now()}-${this.applianceCounter++}`;
+                
+                // Set unique ID
+                card.dataset.id = cardId;
+                
+                // Set appliance name
+                card.querySelector('.appliance-name').textContent = name;
+                
+                // Set icon
+                const iconElement = card.querySelector('.appliance-icon i');
+                iconElement.className = `fas ${icon}`;
+                
+                // Set toggle state
+                const toggle = card.querySelector('input[type="checkbox"]');
+                toggle.checked = isOn;
+                toggle.id = `toggle-${cardId}`;
+                
+                // Set status
+                const statusBadge = card.querySelector('.status-badge');
+                if (isOn) {
+                    statusBadge.textContent = 'ON';
+                    statusBadge.className = 'status-badge status-on';
+                    card.querySelector('.power-value').textContent = `${power}W`;
+                } else {
+                    statusBadge.textContent = 'OFF';
+                    statusBadge.className = 'status-badge status-off';
+                    card.querySelector('.power-value').textContent = '0W';
+                }
+                
+                // Store power value in data attribute for toggle functionality
+                card.dataset.power = power;
+                
+                return card;
+            }
+            
+            deleteAppliance(card) {
+                const name = card.querySelector('.appliance-name').textContent;
+                
+                // Add to activity logs
+                this.addToActivityLog(name, 'removed');
+                
+                // Remove card with animation
+                card.style.transform = 'scale(0.8)';
+                card.style.opacity = '0';
+                
+                setTimeout(() => {
+                    card.remove();
+                    this.saveAppliancesToStorage();
+                    renderApplianceDonut();
+                }, 300);
+            }
+            
+            handleToggleSwitch(toggle) {
+                const card = toggle.closest('.appliance-card');
+                const statusBadge = card.querySelector('.status-badge');
+                const powerValue = card.querySelector('.power-value');
+                const power = parseInt(card.dataset.power) || 100;
+                const name = card.querySelector('.appliance-name').textContent;
+                
+                if (toggle.checked) {
+                    statusBadge.textContent = 'ON';
+                    statusBadge.className = 'status-badge status-on';
+                    powerValue.textContent = `${power}W`;
+                    this.addToActivityLog(name, 'turned ON');
+                } else {
+                    statusBadge.textContent = 'OFF';
+                    statusBadge.className = 'status-badge status-off';
+                    powerValue.textContent = '0W';
+                    this.addToActivityLog(name, 'turned OFF');
+                }
+                
+                this.saveAppliancesToStorage();
+                renderApplianceDonut();
+            }
+            
+            saveAppliancesToStorage() {
+                const appliances = [];
+                const cards = this.applianceGrid.querySelectorAll('.appliance-card');
+                
+                cards.forEach(card => {
+                    const name = card.querySelector('.appliance-name').textContent;
+                    const icon = card.querySelector('.appliance-icon i').className;
+                    const isOn = card.querySelector('input[type="checkbox"]').checked;
+                    const power = parseInt(card.dataset.power) || 100;
+                    
+                    appliances.push({
+                        name,
+                        icon: icon.replace('fas ', ''),
+                        isOn,
+                        power
+                    });
+                });
+                
+                try {
+                    localStorage.setItem('smartHomeAppliances', JSON.stringify(appliances));
+                } catch (e) {
+                    console.error('Failed to save appliances to localStorage:', e);
+                }
+            }
+            
+            loadAppliancesFromStorage() {
+                try {
+                    const saved = localStorage.getItem('smartHomeAppliances');
+                    if (saved) {
+                        const appliances = JSON.parse(saved);
+                        appliances.forEach(appliance => {
+                            const card = this.createApplianceCard(
+                                appliance.name,
+                                appliance.icon,
+                                appliance.power,
+                                appliance.isOn
+                            );
+                            this.applianceGrid.appendChild(card);
+                        });
+                    }
+                } catch (e) {
+                    console.error('Failed to load appliances from localStorage:', e);
+                }
+            }
+            
+            addToActivityLog(applianceName, action) {
+                // In a real app, you would add this to the activity log table
+                console.log(`Activity: ${applianceName} ${action} at ${new Date().toLocaleTimeString()}`);
+                
+                // For demo purposes, show a notification
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #52acbc, #4CAF50);
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    z-index: 3000;
+                    animation: slideIn 0.3s ease;
+                `;
+                
+                notification.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <strong>${applianceName}</strong> ${action}
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+        }
+
+        // Initialize appliance manager
+        const applianceManager = new ApplianceManager();
+
+        // Add CSS for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Simulate real-time data updates
+        function updateDashboard() {
+            // PIR value (motion detection)
+            const pirValue = Math.floor(Math.random() * 50) + 200;
+            document.getElementById('pir-value').textContent = pirValue;
+
+            // LDR value (light sensor)
+            const ldrValue = Math.floor(Math.random() * 200) + 600;
+            document.getElementById('ldr-value').textContent = ldrValue;
+
+            // Current value
+            const current = (Math.random() * 2 + 11).toFixed(1);
+            document.getElementById('current-value').textContent = current + ' A';
+
+            // Wattage
+            const wattage = (parseFloat(current) * 220 / 1000).toFixed(2);
+            document.getElementById('watt-value').textContent = wattage + ' kW';
+
+            // Daily cost
+            const dailyCost = (parseFloat(wattage) * 24 * 1.0).toFixed(2);
+            document.getElementById('cost-day').textContent = '$' + dailyCost;
+
+            // Monthly cost
+            const monthlyCost = Math.floor(parseFloat(dailyCost) * 30);
+            document.getElementById('cost-month').textContent = '$' + monthlyCost;
+        }
+
+        // Update every 3 seconds
+        setInterval(updateDashboard, 3000);
+        updateDashboard();
+
+        /* ---------- Appliance Donut Chart ---------- */
+
+        // Modern Canvas Donut Chart for Appliance Usage
+        function parseWatts(text){
+            if(!text) return 0;
+            const num = (''+text).replace(/[^0-9\.]/g,'');
+            return parseFloat(num) || 0;
+        }
+        function getApplianceData(){
+            const cards = Array.from(document.querySelectorAll('.appliance-card'));
+            return cards.map(card=>{
+                const name = card.querySelector('.appliance-name')?.textContent?.trim() || 'Unknown';
+                const raw = card.querySelector('.power-value')?.textContent || '0W';
+                const watts = parseWatts(raw);
+                return { name, watts };
+            }).filter(d=>d.watts>0);
+        }
+        function renderApplianceDonut(){
+            const data = getApplianceData();
+            const canvas = document.getElementById('appliance-donut-canvas');
+            const legend = document.getElementById('appliance-legend');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            if(legend) legend.innerHTML = '';
+            const total = data.reduce((s,d)=>s+d.watts,0);
+            const cx = 250, cy = 160, rOuter = 100, rInner = 60;
+            const colors = ['#FF7043','#FFB74D','#FFD54F','#4dd0e1','#52acbc','#66bb6a','#9575cd'];
+            if(total === 0){
+                ctx.fillStyle = '#bbb';
+                ctx.font = '16px Poppins, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('No usage data', cx, cy);
+                return;
+            }
+            let angle = -0.5 * Math.PI;
+            data.forEach((d,i)=>{
+                const portion = d.watts/total;
+                const endAngle = angle + portion*2*Math.PI;
+                ctx.beginPath();
+                ctx.arc(cx, cy, rOuter, angle, endAngle);
+                ctx.arc(cx, cy, rInner, endAngle, angle, true);
+                ctx.closePath();
+                ctx.fillStyle = colors[i%colors.length];
+                ctx.globalAlpha = 0.92;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                // percent label
+                if(portion > 0.08){
+                    const mid = angle + (endAngle-angle)/2;
+                    const lx = cx + Math.cos(mid)*((rOuter+rInner)/2);
+                    const ly = cy + Math.sin(mid)*((rOuter+rInner)/2);
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 13px Poppins, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(Math.round(portion*100)+'%', lx, ly+4);
+                }
+                // legend
+                if(legend){
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    const colorBox = document.createElement('div');
+                    colorBox.className = 'legend-color';
+                    colorBox.style.background = colors[i%colors.length];
+                    colorBox.style.width = '16px';
+                    colorBox.style.height = '16px';
+                    colorBox.style.display = 'inline-block';
+                    colorBox.style.borderRadius = '3px';
+                    colorBox.style.marginRight = '8px';
+                    const label = document.createElement('span');
+                    label.innerHTML = `<strong>${d.name}</strong> - ${d.watts}W (${Math.round(portion*100)}%)`;
+                    item.appendChild(colorBox);
+                    item.appendChild(label);
+                    legend.appendChild(item);
+                }
+                angle = endAngle;
+            });
+            // donut center
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, rInner-2, 0, 2*Math.PI);
+            ctx.fillStyle = '#fff';
+            ctx.shadowColor = 'rgba(0,0,0,0.04)';
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.restore();
+            // total text
+            ctx.fillStyle = '#52acbc';
+            ctx.font = 'bold 22px Poppins, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(total+' W', cx, cy+8);
+        }
+        renderApplianceDonut();
+
+        // Profile photo selection and persistence (localStorage)
+        const profileInput = document.getElementById('profile-photo-input');
+        const profileAvatar = document.getElementById('profile-avatar');
+        const removePhotoBtn = document.getElementById('remove-photo-btn');
+
+        function loadProfilePhoto(){
+            try{
+                const data = localStorage.getItem('profilePhoto');
+                if(data && /^data:image\//.test(data)){
+                    profileAvatar.style.backgroundImage = `url(${data})`;
+                    profileAvatar.classList.add('has-photo');
+                    removePhotoBtn.style.display = 'inline-block';
+                } else {
+                    profileAvatar.style.backgroundImage = '';
+                    profileAvatar.classList.remove('has-photo');
+                    removePhotoBtn.style.display = 'none';
+                }
+            }catch(e){
+                alert('Failed to load profile photo.');
+                console.error('Failed to load profile photo', e);
+            }
+        }
+
+        if(profileAvatar){
+            profileAvatar.addEventListener('click', ()=> profileInput.click());
+            profileAvatar.addEventListener('keypress', (e)=> { if(e.key === 'Enter') profileInput.click(); });
+        }
+
+        if(profileInput){
+            profileInput.addEventListener('change', (e)=>{
+                const file = e.target.files && e.target.files[0];
+                if(!file) return;
+                if(!file.type.startsWith('image/')) {
+                    alert('Please select a valid image file.');
+                    return;
+                }
+                if(file.size > 2*1024*1024){
+                    alert('Image is too large. Please select a file under 2MB.');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = ()=>{
+                    try{
+                        localStorage.setItem('profilePhoto', reader.result);
+                        loadProfilePhoto();
+                    }catch(err){
+                        alert('Failed to save photo.');
+                        console.error('Failed to save photo', err);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        if(removePhotoBtn){
+            removePhotoBtn.addEventListener('click', ()=>{
+                localStorage.removeItem('profilePhoto');
+                if(profileInput) profileInput.value = '';
+                loadProfilePhoto();
+            });
+        }
+
+        // load on init
+        loadProfilePhoto();
+
+        // Entrance animations for dashboard content
+        function animateDashboard(){
+            // elements to animate in a professional stagger
+            const selectors = [
+                '.topbar',
+                '.cards-grid .card',
+                '.appliance-grid .appliance-card',
+                '.chart-container',
+                '.table-container'
+            ];
+            let items = [];
+            selectors.forEach(sel=> items = items.concat(Array.from(document.querySelectorAll(sel))));
+            // remove duplicates and only visible
+            items = items.filter((v,i,a)=> a.indexOf(v) === i && v.offsetParent !== null);
+
+            items.forEach(el=> el.classList.add('animate-item'));
+            items.forEach((el,i)=> setTimeout(()=>{
+                el.classList.add('show');
+                // reveal chart svg more prominently
+                if(el.querySelectorAll){
+                    const svgs = el.querySelectorAll('.chart-svg');
+                    svgs.forEach(s=> s.classList.add('show'));
+                }
+            }, 80 * i));
+        }
+
+
+
+ 
+                
+
+
+
+        // run animations after small delay so images/styles are ready
+        setTimeout(animateDashboard, 250);
+    </script>
+</body>
+</html>

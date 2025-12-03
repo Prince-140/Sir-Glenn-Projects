@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Smart Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            z-index: 1;
+        }
+        
+        .login-panel {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            border-radius: 24px;
+            padding: 45px;
+            box-shadow: 0 20px 60px rgba(31, 38, 135, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+        
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 1.3rem;
+            background: rgba(255, 255, 255, 0.15);
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            z-index: 2;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px 15px 15px 65px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .error-message {
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.4);
+            color: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #5a6fd8, #6a4190);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 2;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .password-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .create-account-link {
+            display: block;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        
+        .create-account-link:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        
+        /* Remove default button styles for Create Account if it's an anchor tag */
+        a .login-button {
+            text-decoration: none;
+            display: block;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .login-panel {
+                padding: 30px 25px;
+            }
+            
+            .logo h1 {
+                font-size: 2rem;
+            }
+            
+            .form-group input {
+                padding: 12px 12px 12px 55px;
+                font-size: 0.95rem;
+            }
+            
+            .form-group i {
+                width: 35px;
+                height: 35px;
+                font-size: 1.1rem;
+            }
+            
+            .login-button {
+                padding: 12px;
+                font-size: 1rem; }
+
+           .error-message {
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.4);
+            color: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: block;
+        }
+        
+        .error-message h3 {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+            }
+        
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-panel">
+            <div class="logo">
+                <h1>SMART HOME</h1>
+            </div>
+            
+         
+
+            <% if (error){ %>
+            <div class="error-message">
+                <h3><%= error %></h3>
+            </div>
+            <% } %>
+
+            
+            <form action="/Validation" method="POST" id="loginForm">
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" placeholder="Username" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" id="password" placeholder="Password" required autocomplete="current-password">
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i id="toggleIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+                
+                <button type="submit" class="login-button">Login</button>
+            </form>
+            
+            <a href="/SignUp" class="create-account-link">Don't have an account? Create Account</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const input = document.getElementById("password");
+            const icon = document.getElementById("toggleIcon");
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+        
+        // Form validation
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const username = this.querySelector('input[name="username"]').value.trim();
+            const password = this.querySelector('input[name="password"]').value.trim();
+            const errorDisplay = document.getElementById('errorDisplay');
+            
+            // Clear previous errors
+            errorDisplay.style.display = 'none';
+            errorDisplay.textContent = '';
+            
+            // Basic validation
+            if (!username) {
+                e.preventDefault();
+                showError('Please enter a username');
+                return false;
+            }
+            
+            if (!password) {
+                e.preventDefault();
+                showError('Please enter a password');
+                return false;
+            }
+            
+            if (password.length < 4) {
+                e.preventDefault();
+                showError('Password must be at least 4 characters long');
+                return false;
+            }
+            
+            return true;
+        });
+        
+        function showError(message) {
+            const errorDisplay = document.getElementById('errorDisplay');
+            errorDisplay.textContent = message;
+            errorDisplay.style.display = 'block';
+        }
+        
+        // Simulate server-side error display (for template engines)
+        // This would normally be handled by your backend template
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if there's a URL parameter for error
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorParam = urlParams.get('error');
+            
+            if (errorParam) {
+                showError(decodeURIComponent(errorParam));
+            }
+        });
+    </script>
+</body>
+</html>

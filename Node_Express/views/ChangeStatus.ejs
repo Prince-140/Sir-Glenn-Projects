@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .on-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .on-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .off-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .off-btn:hover {
+            background-color: #da190b;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="button-container">
+       
+
+<div class="button-container">
+
+    <% if (error){ %>
+             
+                <h3><%= error %></h3>
+             
+            <% } %>
+
+
+
+ <form action='Status/turnOn' method="POST">
+
+
+<button class="on-btn" >On</button>
+
+ </form>
+    
+ <form action='Status/turnOff' method="POST">
+
+ 
+        <button class="off-btn" >Off</button>
+
+    
+ </form>
+
+
+
+
+    </div>
+
+    <script>
+         
+    </script>
+</body>
+</html>

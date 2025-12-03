@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appliances List</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Watt Usage</th>
+        </tr>
+        
+        <% if(App_List && App_List.length > 0) { %>
+            <% App_List.forEach(function(result){ %>
+                <tr>
+                    <td><%= result.Id %></td>
+                    <td><%= result.Name %></td>
+                    <td><%= result.Type %></td>
+                    <td><%= result.Status %></td>
+                    <td><%= result.WattUsage %></td>
+                </tr>
+            <% }); %>
+        <% } else { %>
+            <tr>
+                <td colspan="5">No data Found</td>
+            </tr>
+        <% } %>
+    </table>
+</body>
+</html>
