@@ -1,0 +1,41 @@
+<?php
+session_start();
+header('Content-Type: application/json');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+$host = 'localhost';
+$dbname = 'sensors';
+$db_username = 'Prince';  
+$db_password = '';
+$db_port = 3307;
+
+try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') throw new Exception("Invalid request method.");
+    
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+    
+    if (empty($username) || empty($password)) throw new Exception("Username and password required.");
+    
+    $dsn = "mysql:host=$host;port=$db_port;dbname=$dbname;charset=utf8mb4";
+    $pdo = new PDO($dsn, $db_username, $db_password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    
+    $stmt = $pdo->prepare("SELECT passWord, userName FROM users WHERE userName = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+    
+    if (!$user || !password_verify($password, $user['passWord'])) {
+        throw new Exception("Invalid username or password.");
+    }
+    
+    $_SESSION['user'] = $user['userName'];
+    echo json_encode(['success' => true, 'message' => 'Login successful!', 'redirect' => 'test.php']);
+    
+} catch (PDOException $e) {
+    $msg = strpos($e->getMessage(), 'SQLSTATE[HY000]') !== false ? "Database error." : $e->getMessage();
+    echo json_encode(['success' => false, 'message' => 'Login failed: ' . $msg]);
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+}
+?>
