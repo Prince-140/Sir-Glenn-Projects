@@ -414,6 +414,8 @@
         <div class="shape"></div>
     </div>
 
+fetch
+
     <div class="signup-container">
         <div class="signup-panel">
             <!-- Error/Success Messages -->
@@ -600,7 +602,7 @@
             loader.style.display = 'block';
             
            try {
-    const response = await fetch('sign_up_logic.php', {
+    const response = await fetch('../controller/val_con.php', {
         method: 'POST',
         body: formData
     });
@@ -630,7 +632,7 @@
         
         // Redirect after 2 seconds
         setTimeout(() => {
-            window.location.href = data.redirect || 'login.php';
+            window.location.href = data.redirect || '/view/login.php';
         }, 2000);
     } else {
         errorMessage.textContent = data.message || 'An error occurred. Please try again.';
