@@ -43,7 +43,7 @@ try {
     
     $stmt = $pdo->prepare("INSERT INTO users (homeName,firstName,lastName,userName,passWord) VALUES (?,?,?,?,?)");
     if ($stmt->execute([$homeName,$firstName,$lastName,$userName,password_hash($passWord,PASSWORD_DEFAULT)])) {
-        echo json_encode(['success'=>true,'message'=>'Account created!','redirect'=>'../view/login.php']);
+        echo json_encode(['success'=>true,'message'=>'Account created!','redirect'=>'.. /view/login.php']);
     } else {
         throw new Exception("Failed to execute insert.");
     }

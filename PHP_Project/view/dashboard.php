@@ -1,11 +1,32 @@
 <?php
-// dashboard.php - Complete integrated solution
+// dashboard.php - Improved with fixed navigation
 session_start();
 
 // Database connection
 $con = mysqli_connect("localhost", "Prince", "", "sensors", "3307");
 if (!$con) {
     die("Connection failed: " . mysqli_connect_error());
+}
+
+// Fetch latest sensor data
+$sensorQuery = "SELECT * FROM dashboard ORDER BY id DESC LIMIT 1";
+$sensorResult = mysqli_query($con, $sensorQuery);
+$sensorData = mysqli_fetch_assoc($sensorResult);
+
+// Set default values if no data exists
+$motion_value = $sensorData['motion_value'] ?? 245;
+$ldr_value = $sensorData['ldr_value'] ?? 780;
+$total_current = $sensorData['total_current'] ?? 12.5;
+$wattage = $sensorData['wattage'] ?? 2.75;
+
+// Calculate costs based on wattage
+$daily_cost = ($wattage * 24 * 0.15); // Assuming $0.15 per kWh
+$monthly_cost = $daily_cost * 30;
+
+// Determine active section from URL or default to dashboard
+$active_section = 'dashboard'; // Default section
+if (isset($_GET['section']) && in_array($_GET['section'], ['dashboard', 'appliances', 'energy', 'summary', 'logs', 'settings'])) {
+    $active_section = $_GET['section'];
 }
 
 // Handle ALL form submissions
@@ -32,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Redirect to appliances section
-        header("Location: " . $_SERVER['PHP_SELF'] . "#appliances");
+        header("Location: " . $_SERVER['PHP_SELF'] . "?section=appliances");
         exit();
     }
     
@@ -58,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Redirect to appliances section
-        header("Location: " . $_SERVER['PHP_SELF'] . "#appliances");
+        header("Location: " . $_SERVER['PHP_SELF'] . "?section=appliances");
         exit();
     }
     
@@ -78,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['message_type'] = 'success';
         }
         // Redirect to appliances section
-        header("Location: " . $_SERVER['PHP_SELF'] . "#appliances");
+        header("Location: " . $_SERVER['PHP_SELF'] . "?section=appliances");
         exit();
     }
     
@@ -98,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['message_type'] = 'success';
         }
         // Redirect to appliances section
-        header("Location: " . $_SERVER['PHP_SELF'] . "#appliances");
+        header("Location: " . $_SERVER['PHP_SELF'] . "?section=appliances");
         exit();
     }
 }
@@ -112,11 +133,16 @@ unset($_SESSION['message'], $_SESSION['message_type']);
 $query = "SELECT * FROM appliances ORDER BY Id DESC";
 $query_run = mysqli_query($con, $query);
 
-// Check if we should auto-show appliances section after redirect
-$showAppliancesSection = false;
-if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
-    $showAppliancesSection = true;
-}
+// Get page title based on active section
+$page_titles = [
+    'dashboard' => 'Dashboard Overview',
+    'appliances' => 'Appliances Control',
+    'energy' => 'Energy Monitor',
+    'summary' => 'Usage Summary',
+    'logs' => 'Activity Logs',
+    'settings' => 'System Settings'
+];
+$page_title = $page_titles[$active_section] ?? 'Dashboard Overview';
 ?>
 
 <!DOCTYPE html>
@@ -124,7 +150,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Home Dashboard</title>
+    <title>Smart Home Dashboard - <?php echo $page_title; ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -253,6 +279,12 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
             margin-bottom: 15px;
             display: block;
         }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -265,27 +297,27 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
             </div>
 
             <ul class="nav-menu">
-                <li><a href="#" class="nav-link <?php echo !$showAppliancesSection ? 'active' : ''; ?>" data-section="dashboard">
+                <li><a href="?section=dashboard" class="nav-link <?php echo $active_section === 'dashboard' ? 'active' : ''; ?>">
                     <i class="fas fa-chart-line"></i>
                     <span>Dashboard</span>
                 </a></li>
-                <li><a href="#" class="nav-link <?php echo $showAppliancesSection ? 'active' : ''; ?>" data-section="appliances">
+                <li><a href="?section=appliances" class="nav-link <?php echo $active_section === 'appliances' ? 'active' : ''; ?>">
                     <i class="fas fa-lightbulb"></i>
                     <span>Appliances</span>
                 </a></li>
-                <li><a href="#" class="nav-link" data-section="energy">
+                <li><a href="?section=energy" class="nav-link <?php echo $active_section === 'energy' ? 'active' : ''; ?>">
                     <i class="fas fa-bolt"></i>
                     <span>Energy Monitor</span>
                 </a></li>
-                <li><a href="#" class="nav-link" data-section="summary">
+                <li><a href="?section=summary" class="nav-link <?php echo $active_section === 'summary' ? 'active' : ''; ?>">
                     <i class="fas fa-calendar-alt"></i>
                     <span>Summary</span>
                 </a></li>
-                <li><a href="#" class="nav-link" data-section="logs">
+                <li><a href="?section=logs" class="nav-link <?php echo $active_section === 'logs' ? 'active' : ''; ?>">
                     <i class="fas fa-history"></i>
                     <span>Activity Logs</span>
                 </a></li>
-                <li><a href="#" class="nav-link" data-section="settings">
+                <li><a href="?section=settings" class="nav-link <?php echo $active_section === 'settings' ? 'active' : ''; ?>">
                     <i class="fas fa-cog"></i>
                     <span>Settings</span>
                 </a></li>
@@ -300,8 +332,8 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
         <div class="main-content">
             <div class="topbar">
                 <div class="topbar-left">
-                    <h2 id="page-title"><?php echo $showAppliancesSection ? 'Appliances Control' : 'Dashboard Overview'; ?></h2>
-                    <p>Welcome back, User!</p>
+                    <h2 id="page-title"><?php echo $page_title; ?></h2>
+                    <p>Welcome back, <?php echo $_SESSION['user'] ?? 'User'; ?>!</p>
                 </div>
                 <div style="display:flex; align-items:center; gap:12px;">
                     <input type="file" id="profile-photo-input" accept="image/*" style="display:none">
@@ -320,14 +352,14 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
             </div>
 
             <!-- Dashboard Section -->
-            <div class="content-section <?php echo !$showAppliancesSection ? 'active' : ''; ?>" id="dashboard">
+            <div class="content-section <?php echo $active_section === 'dashboard' ? 'active' : ''; ?>" id="dashboard">
                 <div class="cards-grid">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon"><i class="fas fa-user-circle"></i></div>
                             <div class="card-title">Live PIR</div>
                         </div>
-                        <div class="card-value" id="pir-value">245</div>
+                        <div class="card-value" id="pir-value"><?php echo $motion_value; ?></div>
                         <div class="card-footer">
                             <i class="fas fa-arrow-up"></i> Motion detected
                         </div>
@@ -338,7 +370,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-sun"></i></div>
                             <div class="card-title">LDR Value</div>
                         </div>
-                        <div class="card-value" id="ldr-value">780</div>
+                        <div class="card-value" id="ldr-value"><?php echo $ldr_value; ?></div>
                         <div class="card-footer">
                             <i class="fas fa-info-circle"></i> Lux level
                         </div>
@@ -349,7 +381,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-bolt"></i></div>
                             <div class="card-title">Current</div>
                         </div>
-                        <div class="card-value" id="current-value">12.5 A</div>
+                        <div class="card-value" id="current-value"><?php echo $total_current; ?> A</div>
                         <div class="card-footer">
                             <i class="fas fa-chart-line"></i> Real-time
                         </div>
@@ -360,7 +392,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-tachometer-alt"></i></div>
                             <div class="card-title">Wattage</div>
                         </div>
-                        <div class="card-value" id="watt-value">2.75 kW</div>
+                        <div class="card-value" id="watt-value"><?php echo $wattage; ?> kW</div>
                         <div class="card-footer">
                             <i class="fas fa-plug"></i> Total power
                         </div>
@@ -371,7 +403,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-dollar-sign"></i></div>
                             <div class="card-title">Daily Cost</div>
                         </div>
-                        <div class="card-value" id="cost-day">$8.45</div>
+                        <div class="card-value" id="cost-day">$<?php echo number_format($daily_cost, 2); ?></div>
                         <div class="card-footer">
                             <i class="fas fa-calendar-day"></i> Today's usage
                         </div>
@@ -382,7 +414,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-chart-bar"></i></div>
                             <div class="card-title">Monthly Estimate</div>
                         </div>
-                        <div class="card-value" id="cost-month">$253</div>
+                        <div class="card-value" id="cost-month">$<?php echo number_format($monthly_cost, 2); ?></div>
                         <div class="card-footer">
                             <i class="fas fa-calendar-alt"></i> Projected cost
                         </div>
@@ -391,7 +423,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
             </div>
 
             <!-- Appliances Section -->
-            <div class="content-section <?php echo $showAppliancesSection ? 'active' : ''; ?>" id="appliances">
+            <div class="content-section <?php echo $active_section === 'appliances' ? 'active' : ''; ?>" id="appliances">
                 <div class="section-header">
                     <h2><i class="fas fa-lightbulb"></i> Appliances Control</h2>
                     <button class="add-appliance-btn" id="add-appliance-btn">
@@ -414,6 +446,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <button type="button" class="close-modal">&times;</button>
                         </div>
                         <form method="POST" id="appliance-form">
+                            <input type="hidden" name="section" value="appliances">
                             <div class="form-group">
                                 <label for="appliance-names">Appliance Name *</label>
                                 <input type="text" id="appliance-names" name="App_name" 
@@ -486,6 +519,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                                         <div class="action-buttons">
                                             <!-- Remove Button -->
                                             <form method="POST" style="display:inline;">
+                                                <input type="hidden" name="section" value="appliances">
                                                 <input type="hidden" name="remove" value="<?php echo $row['Id']; ?>">
                                                 <button type="submit" class="btn-remove" 
                                                         onclick="return confirm('Are you sure you want to remove <?php echo htmlspecialchars($row['Name']); ?>?')">
@@ -496,6 +530,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                                             <!-- Toggle ON/OFF Buttons -->
                                             <?php if($row['Status'] == 0): ?>
                                                 <form method="POST" style="display:inline;">
+                                                    <input type="hidden" name="section" value="appliances">
                                                     <input type="hidden" name="turnOn" value="1">
                                                     <input type="hidden" name="Id" value="<?php echo $row['Id']; ?>">
                                                     <button type="submit" class="btn-on">
@@ -504,6 +539,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                                                 </form>
                                             <?php else: ?>
                                                 <form method="POST" style="display:inline;">
+                                                    <input type="hidden" name="section" value="appliances">
                                                     <input type="hidden" name="turnOff" value="0">
                                                     <input type="hidden" name="Id" value="<?php echo $row['Id']; ?>">
                                                     <button type="submit" class="btn-off">
@@ -529,14 +565,14 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
             </div>
 
             <!-- Energy Monitor Section -->
-            <div class="content-section" id="energy">
+            <div class="content-section <?php echo $active_section === 'energy' ? 'active' : ''; ?>" id="energy">
                 <div class="cards-grid">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon"><i class="fas fa-bolt"></i></div>
                             <div class="card-title">Current Usage</div>
                         </div>
-                        <div class="card-value">2.75 kW</div>
+                        <div class="card-value"><?php echo $wattage; ?> kW</div>
                         <div class="card-footer">
                             <i class="fas fa-clock"></i> Real-time monitoring
                         </div>
@@ -547,9 +583,9 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-chart-line"></i></div>
                             <div class="card-title">Peak Today</div>
                         </div>
-                        <div class="card-value">3.2 kW</div>
+                        <div class="card-value"><?php echo number_format($wattage * 1.2, 2); ?> kW</div>
                         <div class="card-footer">
-                            <i class="fas fa-arrow-up"></i> At 2:30 PM
+                            <i class="fas fa-arrow-up"></i> At <?php echo date('g:i A'); ?>
                         </div>
                     </div>
 
@@ -558,7 +594,7 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-dollar-sign"></i></div>
                             <div class="card-title">Today's Cost</div>
                         </div>
-                        <div class="card-value">$8.45</div>
+                        <div class="card-value">$<?php echo number_format($daily_cost, 2); ?></div>
                         <div class="card-footer">
                             <i class="fas fa-calendar-day"></i> Daily total
                         </div>
@@ -590,16 +626,16 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
             </div>
 
             <!-- Summary Section -->
-            <div class="content-section" id="summary">
+            <div class="content-section <?php echo $active_section === 'summary' ? 'active' : ''; ?>" id="summary">
                 <div class="cards-grid">
                     <div class="card">
                         <div class="card-header">
                             <div class="card-icon"><i class="fas fa-calendar-day"></i></div>
                             <div class="card-title">Today</div>
                         </div>
-                        <div class="card-value">8.45 kWh</div>
+                        <div class="card-value"><?php echo number_format($wattage * 24, 2); ?> kWh</div>
                         <div class="card-footer">
-                            <i class="fas fa-dollar-sign"></i> Cost: $8.45
+                            <i class="fas fa-dollar-sign"></i> Cost: $<?php echo number_format($daily_cost, 2); ?>
                         </div>
                     </div>
 
@@ -608,9 +644,9 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-calendar-week"></i></div>
                             <div class="card-title">This Week</div>
                         </div>
-                        <div class="card-value">59.2 kWh</div>
+                        <div class="card-value"><?php echo number_format($wattage * 24 * 7, 2); ?> kWh</div>
                         <div class="card-footer">
-                            <i class="fas fa-dollar-sign"></i> Cost: $59.20
+                            <i class="fas fa-dollar-sign"></i> Cost: $<?php echo number_format($daily_cost * 7, 2); ?>
                         </div>
                     </div>
 
@@ -619,9 +655,9 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             <div class="card-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div class="card-title">This Month</div>
                         </div>
-                        <div class="card-value">253 kWh</div>
+                        <div class="card-value"><?php echo number_format($wattage * 24 * 30, 2); ?> kWh</div>
                         <div class="card-footer">
-                            <i class="fas fa-dollar-sign"></i> Cost: $253.00
+                            <i class="fas fa-dollar-sign"></i> Cost: $<?php echo number_format($monthly_cost, 2); ?>
                         </div>
                     </div>
                 </div>
@@ -638,20 +674,22 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>Monday</td><td>8.5</td><td>$8.50</td><td>2:30 PM</td></tr>
-                            <tr><td>Tuesday</td><td>8.2</td><td>$8.20</td><td>3:15 PM</td></tr>
-                            <tr><td>Wednesday</td><td>9.1</td><td>$9.10</td><td>2:00 PM</td></tr>
-                            <tr><td>Thursday</td><td>8.8</td><td>$8.80</td><td>2:45 PM</td></tr>
-                            <tr><td>Friday</td><td>9.3</td><td>$9.30</td><td>1:30 PM</td></tr>
-                            <tr><td>Saturday</td><td>7.9</td><td>$7.90</td><td>11:00 AM</td></tr>
-                            <tr><td>Sunday</td><td>7.4</td><td>$7.40</td><td>10:30 AM</td></tr>
+                            <?php
+                            $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                            foreach($days as $day) {
+                                $dayUsage = $wattage * 24;
+                                $dayCost = $daily_cost;
+                                $peakTime = rand(10, 18) . ':' . str_pad(rand(0, 59), 2, '0', STR_PAD_LEFT);
+                                echo "<tr><td>$day</td><td>" . number_format($dayUsage, 2) . "</td><td>$" . number_format($dayCost, 2) . "</td><td>$peakTime</td></tr>";
+                            }
+                            ?>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Activity Logs Section -->
-            <div class="content-section" id="logs">
+            <div class="content-section <?php echo $active_section === 'logs' ? 'active' : ''; ?>" id="logs">
                 <div class="table-container">
                     <h3 style="margin-bottom: 20px; font-size: 1.3rem; font-weight: 600;">Recent Activity</h3>
                     <table>
@@ -664,26 +702,61 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>10:45 AM</td><td>Turned ON</td><td>Living Room Light</td><td><span class="status-badge status-on">ACTIVE</span></td></tr>
-                            <tr><td>10:30 AM</td><td>Turned OFF</td><td>Ceiling Fan</td><td><span class="status-badge status-off">INACTIVE</span></td></tr>
-                            <tr><td>09:15 AM</td><td>Turned ON</td><td>Air Conditioner</td><td><span class="status-badge status-on">ACTIVE</span></td></tr>
-                            <tr><td>08:00 AM</td><td>Turned ON</td><td>Smart TV</td><td><span class="status-badge status-on">ACTIVE</span></td></tr>
-                            <tr><td>07:30 AM</td><td>Turned ON</td><td>Computer</td><td><span class="status-badge status-on">ACTIVE</span></td></tr>
-                            <tr><td>11:30 PM</td><td>Turned OFF</td><td>Water Heater</td><td><span class="status-badge status-off">INACTIVE</span></td></tr>
-                            <tr><td>10:00 PM</td><td>Turned OFF</td><td>Living Room Light</td><td><span class="status-badge status-off">INACTIVE</span></td></tr>
-                            <tr><td>09:45 PM</td><td>Auto Mode Enabled</td><td>System</td><td><span class="status-badge status-on">ACTIVE</span></td></tr>
+                            <?php
+                            // Fetch recent appliance activities
+                            $activityQuery = "SELECT a.Name as appliance, al.action, al.timestamp 
+                                           FROM activity_logs al 
+                                           JOIN appliances a ON al.appliance = a.Name 
+                                           ORDER BY al.timestamp DESC LIMIT 8";
+                            $activityResult = mysqli_query($con, $activityQuery);
+                            
+                            if(mysqli_num_rows($activityResult) > 0) {
+                                while($log = mysqli_fetch_assoc($activityResult)) {
+                                    $status = strpos($log['action'], 'ON') !== false ? 'ON' : 'OFF';
+                                    $statusClass = $status === 'ON' ? 'status-on' : 'status-off';
+                                    echo "<tr>
+                                        <td>" . date('H:i', strtotime($log['timestamp'])) . "</td>
+                                        <td>" . htmlspecialchars($log['action']) . "</td>
+                                        <td>" . htmlspecialchars($log['appliance']) . "</td>
+                                        <td><span class='status-badge $statusClass'>$status</span></td>
+                                    </tr>";
+                                }
+                            } else {
+                                // Default activity logs if none exist
+                                $defaultLogs = [
+                                    ['10:45 AM', 'Turned ON', 'Living Room Light', 'ON'],
+                                    ['10:30 AM', 'Turned OFF', 'Ceiling Fan', 'OFF'],
+                                    ['09:15 AM', 'Turned ON', 'Air Conditioner', 'ON'],
+                                    ['08:00 AM', 'Turned ON', 'Smart TV', 'ON'],
+                                    ['07:30 AM', 'Turned ON', 'Computer', 'ON'],
+                                    ['11:30 PM', 'Turned OFF', 'Water Heater', 'OFF'],
+                                    ['10:00 PM', 'Turned OFF', 'Living Room Light', 'OFF'],
+                                    ['09:45 PM', 'Auto Mode Enabled', 'System', 'ON']
+                                ];
+                                
+                                foreach($defaultLogs as $log) {
+                                    $statusClass = $log[3] === 'ON' ? 'status-on' : 'status-off';
+                                    echo "<tr>
+                                        <td>{$log[0]}</td>
+                                        <td>{$log[1]}</td>
+                                        <td>{$log[2]}</td>
+                                        <td><span class='status-badge $statusClass'>{$log[3]}</span></td>
+                                    </tr>";
+                                }
+                            }
+                            ?>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Settings Section -->
-            <div class="content-section" id="settings">
+            <div class="content-section <?php echo $active_section === 'settings' ? 'active' : ''; ?>" id="settings">
                 <div class="settings-section">
                     <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
                     <div class="form-group">
                         <label>Username</label>
-                        <input type="text" value="User" readonly>
+                        <input type="text" value="<?php echo $_SESSION['user'] ?? 'User'; ?>" readonly>
                     </div>
                     <div class="form-group">
                         <label>Email Address</label>
@@ -725,6 +798,32 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
     <!-- External JavaScript -->
     <script src="script.js"></script>
     <script>
+        // Real-time data updates
+        function updateSensorData() {
+            fetch('api/sensors.php')
+                .then(response => response.json())
+                .then(data => {
+                    if(data.pir_value) document.getElementById('pir-value').textContent = data.pir_value;
+                    if(data.ldr_value) document.getElementById('ldr-value').textContent = data.ldr_value;
+                    if(data.total_current) document.getElementById('current-value').textContent = data.total_current + ' A';
+                    if(data.wattage) {
+                        document.getElementById('watt-value').textContent = data.wattage + ' kW';
+                        // Update dependent values
+                        const dailyCost = (data.wattage * 24 * 0.15).toFixed(2);
+                        const monthlyCost = (dailyCost * 30).toFixed(2);
+                        document.getElementById('cost-day').textContent = '$' + dailyCost;
+                        document.getElementById('cost-month').textContent = '$' + monthlyCost;
+                    }
+                })
+                .catch(error => console.error('Error updating sensor data:', error));
+        }
+
+        // Update every 5 seconds
+        setInterval(updateSensorData, 5000);
+        
+        // Initial update
+        updateSensorData();
+
         // Modal functionality for Add Appliance button
         document.addEventListener('DOMContentLoaded', function() {
             const addBtn = document.getElementById('add-appliance-btn');
@@ -800,75 +899,23 @@ if (isset($_GET['section']) && $_GET['section'] === 'appliances') {
                 });
             }
 
-            // Auto-scroll to appliances section if URL has #appliances
-            if (window.location.hash === '#appliances') {
-                // Activate appliances section
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('data-section') === 'appliances') {
-                        link.classList.add('active');
-                    }
-                });
-                
-                document.querySelectorAll('.content-section').forEach(section => {
-                    section.classList.remove('active');
-                    if (section.id === 'appliances') {
-                        section.classList.add('active');
-                    }
-                });
-                
-                // Update page title
-                document.getElementById('page-title').textContent = 'Appliances Control';
-                
-                // Smooth scroll to appliances section
-                setTimeout(() => {
-                    const appliancesSection = document.getElementById('appliances');
-                    if (appliancesSection) {
-                        appliancesSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }, 100);
-            }
-
-            // Enhanced navigation for smooth section switching
+            // JavaScript fallback for navigation - only for smooth scrolling
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remove active class from all links
-                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                    
-                    // Add active class to clicked link
-                    this.classList.add('active');
-                    
-                    // Hide all content sections
-                    document.querySelectorAll('.content-section').forEach(section => {
-                        section.classList.remove('active');
-                    });
-                    
-                    // Show the selected section
-                    const sectionId = this.getAttribute('data-section');
-                    const targetSection = document.getElementById(sectionId);
-                    if (targetSection) {
-                        targetSection.classList.add('active');
-                        
-                        // Update page title
-                        const titles = {
-                            'dashboard': 'Dashboard Overview',
-                            'appliances': 'Appliances Control',
-                            'energy': 'Energy Monitor',
-                            'summary': 'Usage Summary',
-                            'logs': 'Activity Logs',
-                            'settings': 'System Settings'
-                        };
-                        document.getElementById('page-title').textContent = titles[sectionId] || 'Dashboard';
-                        
-                        // Update URL without page reload
-                        history.pushState(null, null, `?section=${sectionId}#${sectionId}`);
-                        
-                        // Smooth scroll to top of section
-                        setTimeout(() => {
-                            targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 100);
+                    // Add visual feedback
+                    this.classList.add('clicked');
+                    setTimeout(() => {
+                        this.classList.remove('clicked');
+                    }, 300);
+                });
+            });
+
+            // Add visual feedback for form submissions
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.classList.add('submitting');
                     }
                 });
             });
